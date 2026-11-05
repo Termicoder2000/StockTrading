@@ -190,7 +190,9 @@ for t1, t2 in pairs_tickers_only:
 
 # Save comparison results to CSV and print output
 df_results = pd.DataFrame(results)
-csv_path = "backtest_results.csv"
+csv_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "csv")
+os.makedirs(csv_dir, exist_ok=True)
+csv_path = os.path.join(csv_dir, "backtest_results.csv")
 df_results.to_csv(csv_path, index=False)
 
 print("\n--- Backtest Results Comparison (Net of Transaction Costs) ---")

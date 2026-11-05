@@ -166,7 +166,9 @@ for name, model in models.items():
 # 5. DATAFRAME EXPORT & DISPLAY
 # -------------------------------------------------------------
 df_scores = pd.DataFrame(comparison_results)
-csv_filename = "model_comparison_results.csv"
+csv_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "csv")
+os.makedirs(csv_dir, exist_ok=True)
+csv_filename = os.path.join(csv_dir, "model_comparison_results.csv")
 df_scores.to_csv(csv_filename, index=False)
 
 print("\n--- Comprehensive Model Comparison Results ---")

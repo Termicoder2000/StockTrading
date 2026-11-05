@@ -14,7 +14,9 @@ def load_close(ticker, start, end):
     ticker_key = quote(ticker.upper(), safe="")
     start_key = start_date.strftime("%Y-%m-%d")
     end_key = end_date.strftime("%Y-%m-%d")
-    cache_path = Path(__file__).resolve().parent / f"{ticker_key}_{start_key}_{end_key}.csv"
+    cache_dir = Path(__file__).resolve().parent / "csv"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = cache_dir / f"{ticker_key}_{start_key}_{end_key}.csv"
 
     if cache_path.exists():
         print(f"Reading cached {ticker} data from '{cache_path.name}'")
