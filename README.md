@@ -37,7 +37,7 @@ python ML_Models.py
 
 | Script | Plots | Results table |
 | --- | --- | --- |
-| `PairsTrading.py` | `images/<pair>/prices_and_trades.png`, `zscore_signals_unsecured.png`, `zscore_signals_secured.png` | `csv/backtest_results.csv` |
+| `PairsTrading.py` | `images/<pair>/prices_and_trades.png`, `zscore_signals_unsecured.png`, `zscore_signals_secured.png`; for JPM/BAC also `strategy_performance.png` | `csv/backtest_results.csv` |
 | `ML_Models.py` | `images/ml_models/random_forest_performance.png`, `xgboost_performance.png`, `logistic_regression_performance.png` | `csv/model_comparison_results.csv` |
 
 ## Pair Trading: Z-Score and JPM/BAC Results
@@ -66,6 +66,10 @@ In the secured plot, the same +/-3 levels are active stop-loss thresholds, along
 
 ![JPM/BAC secured strategy Z-score and entry signals](images/JPM_BAC/zscore_signals_secured.png)
 
+This performance plot shows the cumulative net return of both JPM/BAC strategies over time. “Full Risk” is the unsecured strategy: it exits only when the Z-score returns to the mean range. The second curve uses both the stop-loss and 30-observation time limit. The final percentages in the legend include the modeled transaction costs and should match the corresponding totals in the CSV for the same run. Both curves also fall substantially from their 2026 peaks, so the positive final returns hide meaningful interim drawdowns.
+
+![JPM/BAC cumulative net returns: Full Risk and secured time-limit strategies](images/JPM_BAC/strategy_performance.png)
+
 The currently stored [`backtest_results.csv`](csv/backtest_results.csv) reports these net returns for JPM/BAC, after the script's modeled transaction costs:
 
 | Variant | Net return |
@@ -73,7 +77,9 @@ The currently stored [`backtest_results.csv`](csv/backtest_results.csv) reports 
 | Unsecured mean-reversion strategy | 16.79% |
 | Secured strategy with stop-loss and time exit | 23.06% |
 
-These are total backtest returns over the selected period, not annualized returns and not a comparison against Buy & Hold. The calculation applies the position to the difference between the two stocks' daily percentage returns, with 0.1% modeled cost per unit of position change. It is a simplified simulation, not a fully weighted portfolio or execution model.
+These are total backtest returns over the selected period, not annualized returns and not a comparison against Buy & Hold. As an illustration, if these returns were applied to a $10,000 starting balance, the modeled gains would be $1,679 for Full Risk and $2,306 for the secured strategy, before any costs not included in the script. The script does not define a starting balance or explicit portfolio sizing, so dollar profit scales with the assumed capital.
+
+The calculation applies the position to the difference between the two stocks' daily percentage returns, with 0.1% modeled cost per unit of position change. It is a simplified simulation, not a fully weighted portfolio or execution model.
 
 ## ML Model Plots
 

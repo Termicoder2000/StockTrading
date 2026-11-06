@@ -89,7 +89,8 @@ for t1, t2 in pairs_tickers_only:
         sig_uns = pd.Series(pos_unsecured, index=zscore.index)
         strat_ret_uns = sig_uns.shift(1) * daily_diff_returns
         costs_uns = sig_uns.diff().abs().fillna(0) * cost_per_trade
-        net_uns = (1 + (strat_ret_uns - costs_uns).dropna()).prod() - 1
+        net_returns_uns = strat_ret_uns - costs_uns
+        net_uns = (1 + net_returns_uns.dropna()).prod() - 1
 
         # -------------------------------------------------------------
         # STRATEGY 2: SECURED (Stop-Loss and Time-Exit)
@@ -124,7 +125,35 @@ for t1, t2 in pairs_tickers_only:
         sig_sec = pd.Series(pos_secured, index=zscore.index)
         strat_ret_sec = sig_sec.shift(1) * daily_diff_returns
         costs_sec = sig_sec.diff().abs().fillna(0) * cost_per_trade
-        net_sec = (1 + (strat_ret_sec - costs_sec).dropna()).prod() - 1
+        net_returns_sec = strat_ret_sec - costs_sec
+        net_sec = (1 + net_returns_sec.dropna()).prod() - 1
+
+        if (t1, t2) == ("JPM", "BAC"):
+            cumulative_uns = (1 + net_returns_uns.fillna(0)).cumprod() - 1
+            cumulative_sec = (1 + net_returns_sec.fillna(0)).cumprod() - 1
+
+            plt.figure(figsize=(12, 6))
+            plt.plot(
+                cumulative_uns.index,
+                cumulative_uns * 100,
+                label=f'Unsecured (Full Risk): {net_uns * 100:.2f}%',
+                linewidth=2
+            )
+            plt.plot(
+                cumulative_sec.index,
+                cumulative_sec * 100,
+                label=f'Secured (Stop-Loss + Time Limit): {net_sec * 100:.2f}%',
+                linewidth=2
+            )
+            plt.axhline(0, color='black', linestyle='--', alpha=0.5)
+            plt.title('JPM/BAC Pair Trading: Cumulative Net Return')
+            plt.xlabel('Date')
+            plt.ylabel('Cumulative Return (%)')
+            plt.legend()
+            plt.grid(True)
+            plt.tight_layout()
+            plt.savefig(os.path.join(pair_dir, 'strategy_performance.png'))
+            plt.close()
 
         # Store performance comparison metrics
         results.append({
@@ -198,4 +227,4 @@ df_results.to_csv(csv_path, index=False)
 print("\n--- Backtest Results Comparison (Net of Transaction Costs) ---")
 print(df_results.to_string(index=False))
 print(f"\nResults table successfully saved to '{csv_path}'!")
-print("All plots (Prices, Unsecured Signals, Secured Signals) successfully saved in the 'images/' folder!")
+print("All pair plots (including JPM/BAC strategy performance) successfully saved in the 'images/' folder!")
