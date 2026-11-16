@@ -74,7 +74,7 @@ This performance plot shows the cumulative net return of both JPM/BAC strategies
 
 ![JPM/BAC cumulative net returns: Full Risk and secured time-limit strategies](images/JPM_BAC/strategy_performance.png)
 
-The currently stored [`backtest_results.csv`](csv/backtest_results.csv) reports these net returns for JPM/BAC, after the script's modeled transaction costs:
+The checked-in [JPM/BAC performance chart](images/JPM_BAC/strategy_performance.png) reports these net returns after the script's modeled transaction costs:
 
 | Variant | Net return |
 | --- | ---: |
@@ -90,6 +90,20 @@ The calculation applies the position to the difference between the two stocks' d
 The script compares Random Forest, Extra Trees, Histogram Gradient Boosting, XGBoost, and scaled Ridge Regression. All stocks are pooled into one training set. Market-neutral entry thresholds are selected on three expanding, chronological validation folds; the models are then refit on the development period and evaluated on the final 20% of weekly signal dates. Separately, model and threshold selection for the dollar-denominated portfolio uses the same chronological validation approach, optimizing the budget simulation's Sharpe ratio.
 
 Portfolio signals are market-neutral: the long and short sides each receive half of gross exposure, with inverse-volatility weighting. The backtest charges 0.1% commission and 0.05% slippage per unit of turnover and 3% annualized borrow cost on short exposure. It reports comparisons with SPY, equal-weight buy-and-hold, cash, 20-day momentum, 20-day mean reversion, and a seeded random baseline. The CSV includes per-model portfolio rows and per-model/per-stock rows with forecast error, returns, Sharpe ratio, drawdown, and turnover. Per-stock charts include Buy/Sell/Hold markers.
+
+### Current Holdout Results
+
+The following market-neutral portfolio results are from the final holdout (2025-06-24 to 2026-10-30), after modeled costs:
+
+| Model | Net return | Sharpe ratio | Max drawdown |
+| --- | ---: | ---: | ---: |
+| Random Forest | -1.60% | -0.300 | -4.48% |
+| Extra Trees | -1.98% | -0.367 | -5.51% |
+| Histogram Gradient Boosting | +5.90% | +0.700 | -5.27% |
+| XGBoost | -1.12% | -0.341 | -2.48% |
+| Ridge Regression | 0.00% | 0.000 | 0.00% |
+
+For comparison, SPY returned +26.24%, equal-weight buy-and-hold +37.25%, cash 0.00%, 20-day momentum -42.46%, 20-day mean reversion +32.50%, and the seeded random baseline -30.95% over the same period. These are historical simulation results, not investment advice.
 
 The JPM/BAC and XOM/CVX spread features provide pair context, but this is not a cointegration-tested pair-spread strategy. Inverse-volatility weighting is not a volatility-harvesting forecast. The final historical period was examined in an earlier iteration, so it is not a pristine holdout; model/threshold selection itself uses only the earlier walk-forward folds. Results remain simulations and omit taxes, market impact, and other execution details. The budget account's final holdout results are historical, not a guarantee of future performance or investment advice.
 
