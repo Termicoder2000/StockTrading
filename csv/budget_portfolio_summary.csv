@@ -1,0 +1,2 @@
+Model,Min_Edge_%,Budget_CV_Mean_Sharpe,Budget_CV_Mean_Return_%,Starting_Capital_$,Ending_Value_$,Profit_$,Return_%,SPY_Ending_Value_$,Equal_Weight_Ending_Value_$,Max_Drawdown_%,Sharpe_Ratio,Total_Costs_$,Number_of_Trades,Average_Holdings,Max_Holdings,Final_Cash_$
+XGBoost,0.0,0.9790000000000001,15.746666666666668,10000.0,12126.34,2126.34,21.26,12623.86,13725.14,-10.17,1.003,999.24,476,4.77,9,0.0

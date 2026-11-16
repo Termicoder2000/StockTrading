@@ -16,7 +16,7 @@ def load_close(ticker, start, end):
     end_key = end_date.strftime("%Y-%m-%d")
     cache_dir = Path(__file__).resolve().parent / "csv"
     cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = cache_dir / f"{ticker_key}_{start_key}_{end_key}.csv"
+    cache_path = cache_dir / f"{ticker_key}_{start_key}_{end_key}_adjusted.csv"
 
     if cache_path.exists():
         print(f"Reading cached {ticker} data from '{cache_path.name}'")
@@ -36,7 +36,13 @@ def load_close(ticker, start, end):
         return close
 
     print(f"Downloading historical data for {ticker}...")
-    downloaded_data = yf.download(ticker, start=start_key, end=end_key, progress=False)
+    downloaded_data = yf.download(
+        ticker,
+        start=start_key,
+        end=end_key,
+        auto_adjust=True,
+        progress=False,
+    )
     if downloaded_data.empty:
         raise ValueError(f"No data returned for {ticker} ({start_key} to {end_key})")
 
