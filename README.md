@@ -40,7 +40,9 @@ python ML_Models.py
 | `PairsTrading.py` | `images/<pair>/prices_and_trades.png`, `zscore_signals_unsecured.png`, `zscore_signals_secured.png`; for JPM/BAC also `strategy_performance.png` | `csv/backtest_results.csv` |
 | `ML_Models.py` | Portfolio plots in `images/ml_models/`; per-stock plots in `images/ml_models/<TICKER>/<model>_performance.png`; selected capital-limited account in `images/ml_models/selected_budget_portfolio.png` | `csv/model_comparison_results.csv`, plus the budget-account files below |
 
-The selected budget portfolio has a default starting balance of $10,000, is long-only, holds fractional shares, and targets no more than 20% of account value per stock at each rebalance. It invests only when at least three stocks pass the selected threshold; otherwise it can remain in cash. The model and threshold are selected using walk-forward Sharpe ratios for this budgeted simulation, not by the final holdout. Orders are modeled at the next close, with 0.1% commission and 0.05% slippage per traded dollar. The output files are `csv/budget_portfolio_summary.csv`, `csv/budget_portfolio_equity_curve.csv` (daily account value, cash and benchmarks), `csv/budget_portfolio_trades.csv`, and `csv/budget_portfolio_positions.csv`.
+The selected budget portfolio has a default starting balance of $10,000, is long-only, holds fractional shares, and targets no more than 20% of account value per stock at each rebalance. All ten configured stocks are eligible, but the model does not have to hold all of them at once. It invests only when at least three stocks pass the selected threshold; otherwise it can remain in cash. The model and threshold are selected using walk-forward Sharpe ratios for this budgeted simulation, not by the final holdout. Orders are modeled at the next close, with 0.1% commission and 0.05% slippage per traded dollar. The output files are `csv/budget_portfolio_summary.csv`, `csv/budget_portfolio_equity_curve.csv` (daily account value, cash and benchmarks), `csv/budget_portfolio_trades.csv`, and `csv/budget_portfolio_positions.csv`.
+
+The budget-portfolio chart's lower panel marks which tickers are held on each date. `SPY Buy & Hold` assumes the starting amount is invested in SPY at the beginning of the test period and then held. `Equal-Weight Buy & Hold` splits the starting amount equally among the ten stocks at the beginning and holds those shares without rebalancing.
 
 ## Pair Trading: Z-Score and JPM/BAC Results
 
@@ -94,3 +96,11 @@ The JPM/BAC and XOM/CVX spread features provide pair context, but this is not a 
 ## Interpretation Notes
 
 These results are historical simulations, not investment advice. They depend on the data source, time period, thresholds, and simplified transaction-cost assumptions. Slippage, taxes, liquidity, and other execution costs are not fully modeled. A strong classification metric also does not necessarily imply a profitable strategy.
+
+### Selected Budget Portfolio
+
+The chart below shows the selected XGBoost budget portfolio over the final holdout period (2025-06-24 to 2026-10-30). The blue line is the portfolio starting with $10,000; the gray line is SPY Buy & Hold; the orange line is the initial equal-weight portfolio of all ten stocks held without rebalancing. Green and red markers indicate buys and sells. In the lower panel, each row is a stock and green cells mark the dates it was held. All ten stocks were held at least once, with up to nine held at the same time.
+
+![Budgeted XGBoost portfolio value, benchmarks, trade markers, and daily holdings](images/ml_models/selected_budget_portfolio.png)
+
+The budget portfolio ended at $12,126.34 (+21.26%), compared with $12,623.86 for SPY and $13,725.14 for the equal-weight benchmark. Its modeled transaction costs totaled $999.24 and its maximum drawdown was 10.17%. The benchmark curves do not include transaction costs, so the comparison is approximate. This holdout had also been examined in an earlier iteration and is not a pristine out-of-sample test.

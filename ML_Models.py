@@ -4,9 +4,11 @@ matplotlib.use("Agg")
 
 from pathlib import Path
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.colors import ListedColormap
 from sklearn.ensemble import (
     ExtraTreesRegressor,
     HistGradientBoostingRegressor,
@@ -758,9 +760,16 @@ def plot_budget_portfolio(
     model_name: str,
     account: pd.DataFrame,
     trades: pd.DataFrame,
+    positions: pd.DataFrame,
     output_path: Path,
 ) -> None:
-    figure, axis = plt.subplots(figsize=(13, 7))
+    figure, (axis, holdings_axis) = plt.subplots(
+        2,
+        1,
+        figsize=(14, 9),
+        sharex=True,
+        gridspec_kw={"height_ratios": [3, 1.4]},
+    )
     axis.plot(
         account.index,
         account["Account_Value_$"],
@@ -804,28 +813,54 @@ def plot_budget_portfolio(
                 zorder=3,
             )
 
-    holdings_axis = axis.twinx()
-    holdings_axis.step(
-        account.index,
-        account["Holdings"],
-        where="post",
-        color="purple",
-        alpha=0.25,
-        label="Number of holdings",
+    holding_matrix = (
+        positions.pivot_table(
+            index="Date",
+            columns="Ticker",
+            values="Market_Value_$",
+            aggfunc="sum",
+            fill_value=0.0,
+        )
+        .reindex(index=account.index, columns=TICKERS, fill_value=0.0)
+        .gt(0)
     )
-    holdings_axis.set_ylabel("Number of stocks held")
-    holdings_axis.set_ylim(0, MAX_HOLDINGS + 1)
+    date_numbers = mdates.date2num(account.index.to_pydatetime())
+    if len(date_numbers) > 1:
+        midpoints = (date_numbers[:-1] + date_numbers[1:]) / 2
+        date_edges = np.concatenate(
+            (
+                [date_numbers[0] - (midpoints[0] - date_numbers[0])],
+                midpoints,
+                [date_numbers[-1] + (date_numbers[-1] - midpoints[-1])],
+            )
+        )
+    else:
+        date_edges = np.array([date_numbers[0] - 0.5, date_numbers[0] + 0.5])
+    holdings_axis.pcolormesh(
+        date_edges,
+        np.arange(len(TICKERS) + 1),
+        holding_matrix.to_numpy(dtype=int).T,
+        cmap=ListedColormap(["#eeeeee", "seagreen"]),
+        vmin=0,
+        vmax=1,
+        shading="flat",
+    )
+    holdings_axis.set_yticks(np.arange(len(TICKERS)) + 0.5)
+    holdings_axis.set_yticklabels(TICKERS)
+    holdings_axis.set_ylabel("Stocks held")
+    holdings_axis.set_xlabel("Date")
+    holdings_axis.xaxis.set_major_locator(mdates.AutoDateLocator())
+    holdings_axis.xaxis.set_major_formatter(
+        mdates.ConciseDateFormatter(holdings_axis.xaxis.get_major_locator())
+    )
     axis.set_title(
         f"Budgeted portfolio: {model_name} | "
         f"ending value ${account['Account_Value_$'].iloc[-1]:,.2f}"
     )
-    axis.set_xlabel("Date")
     axis.set_ylabel("Portfolio value (USD)")
-    handles, labels = axis.get_legend_handles_labels()
-    extra_handles, extra_labels = holdings_axis.get_legend_handles_labels()
-    axis.legend(handles + extra_handles, labels + extra_labels, loc="best")
+    axis.legend(loc="upper left")
     axis.grid(True, alpha=0.3)
-    figure.tight_layout()
+    figure.subplots_adjust(hspace=0.08)
     figure.savefig(output_path)
     plt.close(figure)
 
@@ -1099,7 +1134,7 @@ def run_training() -> pd.DataFrame:
     ).to_csv(summary_filename, index=False)
     budget_plot_filename = plot_dir / "selected_budget_portfolio.png"
     plot_budget_portfolio(
-        budget_model_name, account, trades, budget_plot_filename
+        budget_model_name, account, trades, positions, budget_plot_filename
     )
 
     print("\n--- Walk-forward selected models and final holdout ---")
